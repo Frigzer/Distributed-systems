@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <sstream>
 
+// Loads graph from file (file format similar to graph-x.txt)
 static std::vector<std::vector<int>> loadGraph(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -25,6 +26,7 @@ static std::vector<std::vector<int>> loadGraph(const std::string& filename) {
     return graph;
 }
 
+// Recursive DFS function
 void dfs(const std::vector<std::vector<int>>& graph, int node, std::vector<bool>& visited) {
     visited[node] = true;
     for (size_t i = 0; i < graph.size(); ++i) {
@@ -34,6 +36,7 @@ void dfs(const std::vector<std::vector<int>>& graph, int node, std::vector<bool>
     }
 }
 
+// Checks if node can be initializator
 bool isGoodFirstNode(const std::vector<std::vector<int>>& graph, int firstNode) {
     int n = graph.size();
     std::vector<bool> nodesCovered(n, false);
