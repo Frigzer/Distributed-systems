@@ -19,4 +19,24 @@
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="graph-1.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
+    <Text Include="graph-2.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
+    <Text Include="graph-3.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
+    <Text Include="graph-4.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
+    <Text Include="graph-5.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
+    <Text Include="graph-6.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
