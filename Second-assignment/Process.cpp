@@ -24,6 +24,7 @@ void Process::requestCS(std::vector<Process>& all) {
 }
 
 void Process::receiveRequest(const Request& req, std::vector<Process>& all) {
+	clock = std::max(clock, req.timestamp) + 1;
 	std::cout << "\t[REQUEST] P" << req.sender << " -> P" << id << "\n";
 
 	if (!requesting || req < currentRequest) {
@@ -37,6 +38,7 @@ void Process::receiveRequest(const Request& req, std::vector<Process>& all) {
 }
 
 void Process::receiveReply(int from) {
+	clock++;
 	std::cout << "\t[REPLY RECEIVED] P" << id << " got reply from P" << from << "\n";
 	goAhead[from] = 1;
 }
@@ -52,6 +54,7 @@ bool Process::canEnterCS() {
 void Process::exitCS(std::vector<Process>& all) {
 	requesting = false;
 	csCount++;
+	clock++;
 
 	std::cout << "\t-> Process " << id << " replying to deferred: ";
 	for (int pid : deferred) {
