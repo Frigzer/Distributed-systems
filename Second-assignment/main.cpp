@@ -28,10 +28,18 @@ int main() {
             // symulowane czekanie
         }
 
-        std::cout << "       → Process " << pid << " ENTERED critical section.\n";
+        std::cout << "\t-> Process " << pid << " ENTERED critical section.\n";
 
         processes[pid].exitCS(processes);
-        std::cout << "       → Process " << pid << " EXITED critical section.\n";
+        std::cout << "\t-> Process " << pid << " EXITED critical section.\n";
+    }
+
+    std::cout << "\n=== Final State of Processes ===\n";
+    for (const auto& p : processes) {
+        std::cout << "Process " << p.getId()
+            << " | Final clock: " << p.getClock()
+            << " | Times in CS: " << p.getCSCount()
+            << std::endl;
     }
 
     return 0;
