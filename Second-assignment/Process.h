@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 
 class Process {
 private:
@@ -12,6 +13,7 @@ private:
 
     int id;
     int clock;
+    int csCount;
     bool requesting;
     Request currentRequest;
     std::vector<int> goAhead;
@@ -29,4 +31,8 @@ public:
     bool canEnterCS();
 
     void exitCS(std::vector<Process>& all);
+
+    int getClock() const;
+    int getId() const;
+    int getCSCount() const;
 };
