@@ -9,15 +9,26 @@ Process::Process(int _id, int n) : id(_id), clock(n), requesting(false) {
 	csCount = 0;
 }
 
-void Process::requestCS(std::vector<Process>& all) {
+void Process::requestCS(std::vector<Process>& all, int reqId) {
+	if (requesting) {
+		std::cout << "\t" << std::left << std::setw(22) << "[SKIP]" << " P" << id << " already requesting\n";
+		return;
+	}
+
 	clock++;
 	requesting = true;
 	currentRequest = { clock,id };
 	std::fill(goAhead.begin(), goAhead.end(), 0);
 	goAhead[id] = 1;
 
+	std::cout << "\n[REQ " << reqId << "] Process " << id << " is requesting CS (ts = " << clock << ")\n";
+	std::cout << "\t" << std::left << std::setw(22) 
+			  << "[ENTER CS]" << " P" << id << " (clock = " << clock << ")\n";
+
 	for (Process& p : all) {
 		if (p.id != id) {
+			std::cout << "\t" << std::left << std::setw(22) 
+					  << "[SENT REQUEST]" << " P" << id << " -> P" << p.id << "\n";
 			p.receiveRequest(currentRequest, all);
 		}
 	}
@@ -25,21 +36,27 @@ void Process::requestCS(std::vector<Process>& all) {
 
 void Process::receiveRequest(const Request& req, std::vector<Process>& all) {
 	clock = std::max(clock, req.timestamp) + 1;
-	std::cout << "\t[REQUEST] P" << req.sender << " -> P" << id << "\n";
+	std::cout << "\t" << std::left << std::setw(22) 
+			  << "[RECEIVED REQUEST]" << " P" << id << " got request from P" << req.sender
+			  << " (ts = " << req.timestamp << ", clock = " << clock << ")\n";
 
 	if (!requesting || req < currentRequest) {
-		std::cout << "\t[REPLY]   P" << id << " replies to P" << req.sender << "\n";
+		std::cout << "\t" << std::left << std::setw(22) 
+				  << "[SENT REPLY]" << " P" << id << " replies to P" << req.sender << "\n";
 		all[req.sender].receiveReply(id);
 	}
 	else {
-		std::cout << "\t[DEFER]   P" << id << " defers reply to P" << req.sender << "\n";
+		std::cout << "\t" << std::left << std::setw(22) 
+				  << "[DEFER]" << " P" << id << " defers reply to P" << req.sender << "\n";
 		deferred.push_back(req.sender);
 	}
 }
 
 void Process::receiveReply(int from) {
 	clock++;
-	std::cout << "\t[REPLY RECEIVED] P" << id << " got reply from P" << from << "\n";
+	std::cout << "\t" << std::left << std::setw(22) 
+			  << "[RECEIVED REPLY]" << " P" << id << " got reply from P" << from
+			  << " (clock = " << clock << ")\n";
 	goAhead[from] = 1;
 }
 
@@ -56,12 +73,21 @@ void Process::exitCS(std::vector<Process>& all) {
 	csCount++;
 	clock++;
 
-	std::cout << "\t-> Process " << id << " replying to deferred: ";
-	for (int pid : deferred) {
-		all[pid].receiveReply(id);
-		std::cout << pid << " ";
+	std::cout << "\t" << std::left << std::setw(22) 
+			  << "[DEFERRED REPLIES]" << " P" << id << ": ";
+	if (deferred.empty()) {
+		std::cout << "none\n";
 	}
-	std::cout << std::endl;
+	else {
+		for (int pid : deferred) {
+			std::cout << "P" << " ";
+			all[pid].receiveReply(id);	
+		}
+		std::cout << "\n";
+	}
+
+	std::cout << "\t" << std::left << std::setw(22) 
+			  << "[EXIT CS]" << " P" << id << " (clock = " << clock << ")\n";
 
 	deferred.clear();
 }
