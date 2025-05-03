@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <iostream>
+#include <iomanip>
 
 class Process {
 private:
@@ -22,7 +23,7 @@ private:
 public:
     Process(int _id, int n);
 
-    void requestCS(std::vector<Process>& all);
+    void requestCS(std::vector<Process>& all, int reqId);
 
     void receiveRequest(const Request& req, std::vector<Process>& all);
 
