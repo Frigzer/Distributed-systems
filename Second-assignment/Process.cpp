@@ -1,14 +1,17 @@
 ﻿#include "Process.h"
 
+// Compare requests by timestamp, then by sender ID (Lamport order)
 bool Process::Request::operator<(const Request& other) const {
 	return (timestamp < other.timestamp) || (timestamp == other.timestamp && sender < other.sender);
 }
 
+// Initialize process with ID and size of the system (N processes)
 Process::Process(int _id, int n) : id(_id), clock(n), requesting(false) {
 	goAhead.resize(n, 0);
 	csCount = 0;
 }
 
+// Broadcast request to all other processes
 void Process::requestCS(std::vector<Process>& all, int reqId) {
 	if (requesting) {
 		std::cout << "\t" << std::left << std::setw(22) << "[SKIP]" << " P" << id << " already requesting\n";
@@ -34,6 +37,7 @@ void Process::requestCS(std::vector<Process>& all, int reqId) {
 	}
 }
 
+// Handle incoming request, decide to reply or defer
 void Process::receiveRequest(const Request& req, std::vector<Process>& all) {
 	clock = std::max(clock, req.timestamp) + 1;
 	std::cout << "\t" << std::left << std::setw(22) 
@@ -52,6 +56,7 @@ void Process::receiveRequest(const Request& req, std::vector<Process>& all) {
 	}
 }
 
+// Mark that a REPLY was received and update clock
 void Process::receiveReply(int from) {
 	clock++;
 	std::cout << "\t" << std::left << std::setw(22) 
@@ -60,6 +65,7 @@ void Process::receiveReply(int from) {
 	goAhead[from] = 1;
 }
 
+// Check if all REPLYs have been received
 bool Process::canEnterCS() {
 	for (int i = 0; i < goAhead.size(); ++i) {
 		if (i != id && goAhead[i] == 0)
@@ -68,6 +74,7 @@ bool Process::canEnterCS() {
 	return true;
 }
 
+// Exit CS and send deferred REPLYs
 void Process::exitCS(std::vector<Process>& all) {
 	requesting = false;
 	csCount++;
