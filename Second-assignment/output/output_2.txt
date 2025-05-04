@@ -1,0 +1,93 @@
+Enter number of processes: 4
+Enter number of requests: 5
+
+[REQ 1] Process 0 is requesting CS (ts = 5)
+        [ENTER CS]             P0 (clock = 5)
+        [SENT REQUEST]         P0 -> P1
+        [RECEIVED REQUEST]     P1 got request from P0 (ts = 5, clock = 6)
+        [SENT REPLY]           P1 replies to P0
+        [RECEIVED REPLY]       P0 got reply from P1 (clock = 6)
+        [SENT REQUEST]         P0 -> P2
+        [RECEIVED REQUEST]     P2 got request from P0 (ts = 5, clock = 6)
+        [SENT REPLY]           P2 replies to P0
+        [RECEIVED REPLY]       P0 got reply from P2 (clock = 7)
+        [SENT REQUEST]         P0 -> P3
+        [RECEIVED REQUEST]     P3 got request from P0 (ts = 5, clock = 6)
+        [SENT REPLY]           P3 replies to P0
+        [RECEIVED REPLY]       P0 got reply from P3 (clock = 8)
+        [DEFERRED REPLIES]     P0: none
+        [EXIT CS]              P0 (clock = 9)
+
+[REQ 2] Process 3 is requesting CS (ts = 7)
+        [ENTER CS]             P3 (clock = 7)
+        [SENT REQUEST]         P3 -> P0
+        [RECEIVED REQUEST]     P0 got request from P3 (ts = 7, clock = 10)
+        [SENT REPLY]           P0 replies to P3
+        [RECEIVED REPLY]       P3 got reply from P0 (clock = 8)
+        [SENT REQUEST]         P3 -> P1
+        [RECEIVED REQUEST]     P1 got request from P3 (ts = 7, clock = 8)
+        [SENT REPLY]           P1 replies to P3
+        [RECEIVED REPLY]       P3 got reply from P1 (clock = 9)
+        [SENT REQUEST]         P3 -> P2
+        [RECEIVED REQUEST]     P2 got request from P3 (ts = 7, clock = 8)
+        [SENT REPLY]           P2 replies to P3
+        [RECEIVED REPLY]       P3 got reply from P2 (clock = 10)
+        [DEFERRED REPLIES]     P3: none
+        [EXIT CS]              P3 (clock = 11)
+
+[REQ 3] Process 0 is requesting CS (ts = 11)
+        [ENTER CS]             P0 (clock = 11)
+        [SENT REQUEST]         P0 -> P1
+        [RECEIVED REQUEST]     P1 got request from P0 (ts = 11, clock = 12)
+        [SENT REPLY]           P1 replies to P0
+        [RECEIVED REPLY]       P0 got reply from P1 (clock = 12)
+        [SENT REQUEST]         P0 -> P2
+        [RECEIVED REQUEST]     P2 got request from P0 (ts = 11, clock = 12)
+        [SENT REPLY]           P2 replies to P0
+        [RECEIVED REPLY]       P0 got reply from P2 (clock = 13)
+        [SENT REQUEST]         P0 -> P3
+        [RECEIVED REQUEST]     P3 got request from P0 (ts = 11, clock = 12)
+        [SENT REPLY]           P3 replies to P0
+        [RECEIVED REPLY]       P0 got reply from P3 (clock = 14)
+        [DEFERRED REPLIES]     P0: none
+        [EXIT CS]              P0 (clock = 15)
+
+[REQ 4] Process 1 is requesting CS (ts = 13)
+        [ENTER CS]             P1 (clock = 13)
+        [SENT REQUEST]         P1 -> P0
+        [RECEIVED REQUEST]     P0 got request from P1 (ts = 13, clock = 16)
+        [SENT REPLY]           P0 replies to P1
+        [RECEIVED REPLY]       P1 got reply from P0 (clock = 14)
+        [SENT REQUEST]         P1 -> P2
+        [RECEIVED REQUEST]     P2 got request from P1 (ts = 13, clock = 14)
+        [SENT REPLY]           P2 replies to P1
+        [RECEIVED REPLY]       P1 got reply from P2 (clock = 15)
+        [SENT REQUEST]         P1 -> P3
+        [RECEIVED REQUEST]     P3 got request from P1 (ts = 13, clock = 14)
+        [SENT REPLY]           P3 replies to P1
+        [RECEIVED REPLY]       P1 got reply from P3 (clock = 16)
+        [DEFERRED REPLIES]     P1: none
+        [EXIT CS]              P1 (clock = 17)
+
+[REQ 5] Process 3 is requesting CS (ts = 15)
+        [ENTER CS]             P3 (clock = 15)
+        [SENT REQUEST]         P3 -> P0
+        [RECEIVED REQUEST]     P0 got request from P3 (ts = 15, clock = 17)
+        [SENT REPLY]           P0 replies to P3
+        [RECEIVED REPLY]       P3 got reply from P0 (clock = 16)
+        [SENT REQUEST]         P3 -> P1
+        [RECEIVED REQUEST]     P1 got request from P3 (ts = 15, clock = 18)
+        [SENT REPLY]           P1 replies to P3
+        [RECEIVED REPLY]       P3 got reply from P1 (clock = 17)
+        [SENT REQUEST]         P3 -> P2
+        [RECEIVED REQUEST]     P2 got request from P3 (ts = 15, clock = 16)
+        [SENT REPLY]           P2 replies to P3
+        [RECEIVED REPLY]       P3 got reply from P2 (clock = 18)
+        [DEFERRED REPLIES]     P3: none
+        [EXIT CS]              P3 (clock = 19)
+
+=== Final State of Processes ===
+Process 0 | Final clock: 17 | Times in CS: 2
+Process 1 | Final clock: 18 | Times in CS: 1
+Process 2 | Final clock: 16 | Times in CS: 0
+Process 3 | Final clock: 19 | Times in CS: 2
