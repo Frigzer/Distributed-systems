@@ -1,0 +1,232 @@
+>> Node 6 is requesting the token
+Node 6 sends request to Node 2
+Node 2 sends request to Node 0
+Token passed from Node 0 to Node 2
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue: 0
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: Yes | In CS: No | Queue: 6
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue:
+------------------------------
+Token passed from Node 2 to Node 6
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue: 0
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: Yes | In CS: No | Queue:
+------------------------------
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue: 0
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: Yes | In CS: No | Queue:
+------------------------------
+
+>> Node 3 is requesting the token
+Node 3 sends request to Node 1
+Node 1 sends request to Node 0
+Node 0 sends request to Node 2
+Node 2 sends request to Node 6
+Token passed from Node 6 to Node 2
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue: 0 1
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue: 3
+Node 2 | Parent: 0 | Token: Yes | In CS: No | Queue: 0
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Token passed from Node 2 to Node 0
+------------------------------
+Node 0 | Parent: -1 | Token: Yes | In CS: No | Queue: 0 1
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue: 3
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Node 0 enters critical section
+------------------------------
+Node 0 | Parent: -1 | Token: Yes | In CS: Yes | Queue: 1
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue: 3
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Node 0 exits critical section
+Token passed from Node 0 to Node 1
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: Yes | In CS: No | Queue: 3
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Token passed from Node 1 to Node 3
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: Yes | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: Yes | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+
+>> Node 4 is requesting the token
+Node 4 sends request to Node 1
+Node 1 sends request to Node 3
+Token passed from Node 3 to Node 1
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: Yes | In CS: No | Queue: 4
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue: 3
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Token passed from Node 1 to Node 4
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue: 3
+Node 4 | Parent: 1 | Token: Yes | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue: 3
+Node 4 | Parent: 1 | Token: Yes | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Node 3 re-sends (global check) request to Node 1
+Node 6 re-sends (global check) request to Node 2
+Node 1 re-sends (global check) request to Node 4
+Node 2 re-sends (global check) request to Node 0
+Token passed from Node 4 to Node 1
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue: 2
+Node 1 | Parent: 0 | Token: Yes | In CS: No | Queue: 3
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue: 6
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue: 3
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Token passed from Node 1 to Node 3
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue: 2
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue: 6
+Node 3 | Parent: 1 | Token: Yes | In CS: No | Queue: 3
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Node 3 enters critical section
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue: 2
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue: 6
+Node 3 | Parent: 1 | Token: Yes | In CS: Yes | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Node 3 exits critical section
+Node 0 re-sends (global check) request to Node 1
+Node 1 re-sends (global check) request to Node 3
+Token passed from Node 3 to Node 1
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue: 2
+Node 1 | Parent: 0 | Token: Yes | In CS: No | Queue: 0
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue: 6
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Token passed from Node 1 to Node 0
+------------------------------
+Node 0 | Parent: -1 | Token: Yes | In CS: No | Queue: 2
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue: 6
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Token passed from Node 0 to Node 2
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: Yes | In CS: No | Queue: 6
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue: 6
+------------------------------
+Token passed from Node 2 to Node 6
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: Yes | In CS: No | Queue: 6
+------------------------------
+Node 6 enters critical section
+------------------------------
+Node 0 | Parent: -1 | Token: No | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: Yes | In CS: Yes | Queue:
+------------------------------
+Node 6 exits critical section
+Returning token from Node 6 to parent Node 2
+Returning token from Node 2 to parent Node 0
+
+== FINAL STATE ==
+------------------------------
+Node 0 | Parent: -1 | Token: Yes | In CS: No | Queue:
+Node 1 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 2 | Parent: 0 | Token: No | In CS: No | Queue:
+Node 3 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 4 | Parent: 1 | Token: No | In CS: No | Queue:
+Node 5 | Parent: 2 | Token: No | In CS: No | Queue:
+Node 6 | Parent: 2 | Token: No | In CS: No | Queue:
+------------------------------
