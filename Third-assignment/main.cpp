@@ -161,8 +161,16 @@ std::vector<int> loadRequests(const std::string& filename) {
 
 int main() {
     // ---- Load inputs ----
-    loadGraph("graph-3.txt");
-    std::vector<int> reqs = loadRequests("requests-3.txt");
+    std::string graphFilename;
+    std::cout << "Enter the graph filename (must be in the same directory): ";
+    std::cin >> graphFilename;
+    loadGraph(graphFilename);
+
+
+    std::string requestsFilename;
+    std::cout << "Enter the requests filename (must be in the same directory): ";
+    std::cin >> requestsFilename;
+    std::vector<int> reqs = loadRequests(requestsFilename);
 
     int rootId = 0;
     nodes[rootId]->holder = nodes[rootId];
