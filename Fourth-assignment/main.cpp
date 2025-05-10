@@ -1,9 +1,9 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <queue>
 #include <string>
 #include <fstream>
-
+#include <sstream>
 
 // Token structure holding the current target and the queue of requests
 struct Token {
@@ -25,26 +25,39 @@ public:
     }
 
     // Initiates a TR message to neighbor
-    void sendTokenRequest(std::vector<Node>& nodes) {
+    void sendTokenRequest(std::vector<Node>& nodes, std::vector<std::string>& logBuffer) {
         nodes[neighborId].inbox.push({ "TR", id });
-        std::cout << "[New Request] Node " << id << " sent TR to Node " << neighborId << std::endl;
+        std::ostringstream ss;
+        ss << "TR " << id << "->" << neighborId;
+        logBuffer.push_back(ss.str());
     }
 
     // Forwards any message to the next neighbor
-    void forwardMessage(std::pair<std::string, int> msg, std::vector<Node>& nodes) {
+    void forwardMessage(std::pair<std::string, int> msg, std::vector<Node>& nodes, std::vector<std::string>& logBuffer) {
         nodes[neighborId].inbox.push(msg);
+        if (msg.first == "TR") {
+            std::ostringstream ss;
+            ss << "TR " << msg.second << "->" << neighborId;
+            logBuffer.push_back(ss.str());
+        }
+        else if (msg.first == "TKN") {
+            std::ostringstream ss;
+            ss << "TKN ->" << neighborId;
+            logBuffer.push_back(ss.str());
+        }
     }
 };
 
-// Utility to print the current token queue
-void printQueue(std::queue<int> q) {
-   std:: cout << "Current Token Queue: [";
+std::string formatQueue(std::queue<int> q) {
+    std::ostringstream ss;
+    ss << "Q=[";
     while (!q.empty()) {
-        std::cout << q.front();
+        ss << q.front();
         q.pop();
-        if (!q.empty()) std::cout << ", ";
+        if (!q.empty()) ss << ",";
     }
-    std::cout << "]\n";
+    ss << "]";
+    return ss.str();
 }
 
 /*
@@ -77,6 +90,8 @@ int main() {
         return 1;
     }
 
+    std::cout << std::endl;
+
     int N;
     file >> N;
     std::vector<int> scheduledRequests;
@@ -102,12 +117,12 @@ int main() {
     int M = scheduledRequests.size(); // total number of requests
 
     while (successCount < M) {
-        std::cout << "\n=== Iteration " << iteration++ << " ===\n";
+        std::vector<std::string> logBuffer; // collect log events for this iteration
 
         // Send next scheduled TR if available
         if (requestIndex < M) {
             int requester = scheduledRequests[requestIndex++];
-            nodes[requester].sendTokenRequest(nodes);
+            nodes[requester].sendTokenRequest(nodes, logBuffer);
         }
 
         // Process all incoming messages for each node
@@ -120,24 +135,25 @@ int main() {
                 if (msg.first == "TR") {
                     if (node.isPhold) {
                         token.q.push(msg.second);
-                        std::cout << "[Phold] Node " << node.id << " received TR from Node " << msg.second << std::endl;
+                        std::ostringstream ss;
+                        ss << "PH " << node.id << " <- TR " << msg.second;
+                        logBuffer.push_back(ss.str());
                     }
                     else {
-                        node.forwardMessage(msg, nodes);
-                        std::cout << "[Forwarded TR] Node " << node.id << " forwarded TR from Node " << msg.second << " to Node " << node.neighborId << std::endl;
+                        node.forwardMessage(msg, nodes, logBuffer);
                     }
                 }
                 else if (msg.first == "TKN") {
                     if (node.id == token.target) {
                         node.isPhold = true;
                         token.inTransit = false;
-                        std::cout << "[TOKEN RECEIVED] Node " << node.id << " is new Phold\n";
+                        std::ostringstream ss;
+                        ss << "PH = " << node.id << " (RECEIVED TKN)";
+                        logBuffer.push_back(ss.str());
                         successCount++;
-                        printQueue(token.q);
                     }
                     else {
-                        node.forwardMessage(msg, nodes);
-                        std::cout << "[Forwarded TOKEN] Node " << node.id << " forwarded token to Node " << node.neighborId << std::endl;
+                        node.forwardMessage(msg, nodes, logBuffer);
                     }
                 }
             }
@@ -150,30 +166,41 @@ int main() {
             token.q.pop();
 
             if (next == phold) {
-                // If token is for current Phold, process immediately
-                std::cout << "[TOKEN SELF-HANDLED] Node " << phold << " kept the token\n";
+                std::ostringstream ss;
+                ss << "PH = " << phold << " (SELF-HANDLE)";
+                logBuffer.push_back(ss.str());
                 successCount++;
-                printQueue(token.q);
-                continue;
             }
-
-            token.target = next;
-            token.inTransit = true;
-            nodes[phold].isPhold = false;
-            nodes[phold].forwardMessage({ "TKN", next }, nodes);
-
-            std::cout << "[TOKEN SENT] From Node " << phold << " to Node " << next << std::endl;
-            printQueue(token.q);
-            phold = -1; // token is in transit, Phold unknown
+            else {
+                token.target = next;
+                token.inTransit = true;
+                nodes[phold].isPhold = false;
+                nodes[phold].forwardMessage({ "TKN", next }, nodes, logBuffer);
+                std::ostringstream ss;
+                ss << "TKN sent -> " << next;
+                logBuffer.push_back(ss.str());
+                phold = -1;
+            }
         }
 
-        // Update who is the current Phold after token is received
+        // Update Phold
         for (auto& node : nodes) {
             if (node.isPhold) {
                 phold = node.id;
                 break;
             }
         }
+
+        // Print one-line log for this iteration
+        std::cout << "It " << iteration++ << " | ";
+        for (size_t i = 0; i < logBuffer.size(); ++i) {
+            std::cout << logBuffer[i];
+            if (i != logBuffer.size() - 1) std::cout << " | ";
+        }
+        if (!token.q.empty()) {
+            std::cout << " | " << formatQueue(token.q);
+        }
+        std::cout << std::endl;
     }
 
     std::cout << "\nAll " << M << " requests have been successfully processed.\n";
