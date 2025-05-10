@@ -1,31 +1,36 @@
 #include <iostream>
-#include <queue>
 #include <vector>
+#include <queue>
 #include <string>
 #include <cstdlib>
 #include <ctime>
-#include <thread>
-#include <chrono>
 
 using namespace std;
 
 struct Token {
-    int currentHolder;
-    queue<int> requestQueue;
+    int target; // kto ma dostac tokena
+    queue<int> q; // kolejne ID do przekazania tokena
+    bool inTransit = false; // czy token jest w drodze
 };
 
 class Node {
 public:
     int id;
     int neighborId;
-    bool isPhold;
+    bool isPhold = false;
+    queue<pair<string, int>> inbox; // komunikaty TR lub TKN
 
-    Node(int id, int totalNodes) : id(id), isPhold(false) {
+    Node(int id, int totalNodes) : id(id) {
         neighborId = (id + 1) % totalNodes;
     }
 
-    void sendTokenRequest(queue<pair<string, int>>& events) {
-        events.push({ "TR", id });
+    void sendTokenRequest(vector<Node>& nodes) {
+        nodes[neighborId].inbox.push({ "TR", id });
+        cout << "[New Request] Node " << id << " sent TR to Node " << neighborId << endl;
+    }
+
+    void forwardMessage(pair<string, int> msg, vector<Node>& nodes) {
+        nodes[neighborId].inbox.push(msg);
     }
 };
 
@@ -39,109 +44,101 @@ void printQueue(queue<int> q) {
     cout << "]\n";
 }
 
-void printRingState(const vector<Node>& nodes) {
-    cout << "[Ring State]\n";
-    for (const auto& node : nodes) {
-        cout << "Node " << node.id << ": Phold = " << (node.isPhold ? "true" : "false");
-        if (node.isPhold) cout << "  <-- has token";
-        cout << endl;
-    }
-    cout << endl;
-}
-
 int main() {
     srand(time(0));
-
-    int N = 5;  // Number of nodes
-    int M = 10; // Number of requests
+    int N = 5;
+    int M = 10;
 
     vector<Node> nodes;
     for (int i = 0; i < N; ++i)
         nodes.emplace_back(i, N);
 
-    // Initial Phold
-    int initialPhold = 0;
-    nodes[initialPhold].isPhold = true;
+    int phold = 0;
+    nodes[phold].isPhold = true;
 
     Token token;
-    token.currentHolder = initialPhold;
+    token.inTransit = false;
 
-    queue<pair<string, int>> events;
-
-    int successCount = 0, sentRequests = 0;
-    int csDelayCounter = 0;
-    bool inCS = false;
-    int currentTarget = -1;
-
+    int sentRequests = 0;
+    int successCount = 0;
     int iteration = 0;
 
-    while (successCount < M || sentRequests < M) {
-        cout << "\n=== Iteration " << iteration << " ===\n";
+    while (successCount < M) {
+        cout << "\n=== Iteration " << iteration++ << " ===\n";
 
-        // Generate M requests
+        // generate new request
         if (sentRequests < M && (rand() % 100) < 30) {
             int requester = rand() % N;
-            nodes[requester].sendTokenRequest(events);
+            nodes[requester].sendTokenRequest(nodes);
             sentRequests++;
-            cout << "[New Request] Node " << requester << " sent TR\n";
-            
         }
 
+        // process messages
+        for (auto& node : nodes) {
+            queue<pair<string, int>> remaining;
+            while (!node.inbox.empty()) {
+                auto msg = node.inbox.front();
+                node.inbox.pop();
 
-        // Step 1: Handle all TR events and put them in Phold's queue
-        queue<pair<string, int>> remainingEvents;
-        while (!events.empty()) {
-            auto event = events.front();
-            events.pop();
-            if (event.first == "TR") {
-                int requester = event.second;
-                // Forward request until it reaches Phold
-                int forwardNode = requester;
-                while (!nodes[forwardNode].isPhold) {
-                    forwardNode = nodes[forwardNode].neighborId;
+                if (msg.first == "TR") {
+                    if (node.isPhold) {
+                        token.q.push(msg.second);
+                        cout << "[Phold] Node " << node.id << " received TR from Node " << msg.second << endl;
+                    }
+                    else {
+                        node.forwardMessage(msg, nodes);
+                        cout << "[Forwarded TR] Node " << node.id << " forwarded TR from Node " << msg.second << " to Node " << node.neighborId << endl;
+                    }
                 }
-                // Phold gets the request
-                token.requestQueue.push(requester);
-                printQueue(token.requestQueue);
-            }
-            else {
-                remainingEvents.push(event);
-            }
-        }
-
-        // Step 2: Phold finishes CS and passes the token
-        if (!token.requestQueue.empty()) {
-            if (!inCS) {
-                inCS = true;
-                csDelayCounter = 4;
-                currentTarget = token.requestQueue.front();
-                cout << "[CS] Phold started processing request for Node " << currentTarget << "\n";
-            }
-            else {
-                csDelayCounter--;
-                if (csDelayCounter == 0) {
-                    cout << "[CS] Phold finished processing Node " << currentTarget << "\n";
-                    int currentPhold = token.currentHolder;
-                    int nextHolder = token.requestQueue.front();
-                    token.requestQueue.pop();
-
-                    nodes[currentPhold].isPhold = false;
-                    nodes[nextHolder].isPhold = true;
-                    token.currentHolder = nextHolder;
-
-                    successCount++;
-                    printQueue(token.requestQueue);
-                    printRingState(nodes);
-
-                    inCS = false;
+                else if (msg.first == "TKN") {
+                    if (node.id == token.target) {
+                        node.isPhold = true;
+                        token.inTransit = false;
+                        cout << "[TOKEN RECEIVED] Node " << node.id << " is new Phold\n";
+                        successCount++;
+                        printQueue(token.q);
+                    }
+                    else {
+                        node.forwardMessage(msg, nodes);
+                        cout << "[Forwarded TOKEN] Node " << node.id << " forwarded token to Node " << node.neighborId << endl;
+                    }
                 }
             }
+            node.inbox = remaining;
         }
 
-       events = remainingEvents;
-       iteration++;
+        // if Phold not busy and queue has requests, send token
+        if (!token.inTransit && phold != -1 && nodes[phold].isPhold && !token.q.empty()) {
+            int next = token.q.front();
+            token.q.pop();
+
+            if (next == phold) {
+                // self-handle without sending
+                cout << "[TOKEN SELF-HANDLED] Node " << phold << " kept the token\n";
+                successCount++;
+                printQueue(token.q);
+                continue;
+            }
+
+            token.target = next;
+            token.inTransit = true;
+            nodes[phold].isPhold = false;
+            nodes[phold].forwardMessage({ "TKN", next }, nodes);
+
+            cout << "[TOKEN SENT] From Node " << phold << " to Node " << next << endl;
+            printQueue(token.q);
+            phold = -1; // nowy phold jeszcze nieznany
+        }
+
+        // update current phold
+        for (auto& node : nodes) {
+            if (node.isPhold) {
+                phold = node.id;
+                break;
+            }
+        }
     }
 
-    cout << "All " << M << " requests have been successfully processed.\n";
+    cout << "\nAll " << M << " requests have been successfully processed.\n";
     return 0;
 }
