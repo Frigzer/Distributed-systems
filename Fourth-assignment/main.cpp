@@ -2,80 +2,117 @@
 #include <vector>
 #include <queue>
 #include <string>
-#include <cstdlib>
-#include <ctime>
+#include <fstream>
 
-using namespace std;
 
+// Token structure holding the current target and the queue of requests
 struct Token {
-    int target; // kto ma dostac tokena
-    queue<int> q; // kolejne ID do przekazania tokena
-    bool inTransit = false; // czy token jest w drodze
+    int target;                  // target node to receive the token
+    std::queue<int> q;               // queue of pending requests
+    bool inTransit = false;     // is token currently being forwarded
 };
 
+// Node class representing each participant in the ring
 class Node {
 public:
-    int id;
-    int neighborId;
-    bool isPhold = false;
-    queue<pair<string, int>> inbox; // komunikaty TR lub TKN
+    int id;                     // Node's ID
+    int neighborId;             // ID of the next node in the ring
+    bool isPhold = false;       // true if this node currently holds the token
+    std::queue<std::pair<std::string, int>> inbox; // incoming messages: TR (token request) or TKN (token)
 
     Node(int id, int totalNodes) : id(id) {
-        neighborId = (id + 1) % totalNodes;
+        neighborId = (id + 1) % totalNodes; // set neighbor in ring
     }
 
-    void sendTokenRequest(vector<Node>& nodes) {
+    // Initiates a TR message to neighbor
+    void sendTokenRequest(std::vector<Node>& nodes) {
         nodes[neighborId].inbox.push({ "TR", id });
-        cout << "[New Request] Node " << id << " sent TR to Node " << neighborId << endl;
+        std::cout << "[New Request] Node " << id << " sent TR to Node " << neighborId << std::endl;
     }
 
-    void forwardMessage(pair<string, int> msg, vector<Node>& nodes) {
+    // Forwards any message to the next neighbor
+    void forwardMessage(std::pair<std::string, int> msg, std::vector<Node>& nodes) {
         nodes[neighborId].inbox.push(msg);
     }
 };
 
-void printQueue(queue<int> q) {
-    cout << "Current Token Queue: [";
+// Utility to print the current token queue
+void printQueue(std::queue<int> q) {
+   std:: cout << "Current Token Queue: [";
     while (!q.empty()) {
-        cout << q.front();
+        std::cout << q.front();
         q.pop();
-        if (!q.empty()) cout << ", ";
+        if (!q.empty()) std::cout << ", ";
     }
-    cout << "]\n";
+    std::cout << "]\n";
 }
 
+/*
+Expected input format (input.txt):
+
+Line 1: number of nodes N (e.g., 5)
+Lines 2...: list of requests (node IDs that request access to CS), e.g.:
+5
+0
+3
+2
+1
+4
+0
+3
+1
+4
+2
+*/
+
 int main() {
-    srand(time(0));
-    int N = 5;
-    int M = 10;
+    std::string filename;
 
-    vector<Node> nodes;
+    std::cout << "Enter filename (must be in the same folder): ";
+    std::cin >> filename;
+
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open " << filename << std::endl;
+        return 1;
+    }
+
+    int N;
+    file >> N;
+    std::vector<int> scheduledRequests;
+    int val;
+    while (file >> val) {
+        scheduledRequests.push_back(val); // read each TR request
+    }
+    file.close();
+
+    std::vector<Node> nodes;
     for (int i = 0; i < N; ++i)
-        nodes.emplace_back(i, N);
+        nodes.emplace_back(i, N); // initialize nodes with ring neighbors
 
-    int phold = 0;
+    int phold = 0; // initial token holder
     nodes[phold].isPhold = true;
 
     Token token;
     token.inTransit = false;
 
-    int sentRequests = 0;
     int successCount = 0;
     int iteration = 0;
+    int requestIndex = 0;
+    int M = scheduledRequests.size(); // total number of requests
 
     while (successCount < M) {
-        cout << "\n=== Iteration " << iteration++ << " ===\n";
+        std::cout << "\n=== Iteration " << iteration++ << " ===\n";
 
-        // generate new request
-        if (sentRequests < M && (rand() % 100) < 30) {
-            int requester = rand() % N;
+        // Send next scheduled TR if available
+        if (requestIndex < M) {
+            int requester = scheduledRequests[requestIndex++];
             nodes[requester].sendTokenRequest(nodes);
-            sentRequests++;
         }
 
-        // process messages
+        // Process all incoming messages for each node
         for (auto& node : nodes) {
-            queue<pair<string, int>> remaining;
+            std::queue<std::pair<std::string, int>> remaining;
             while (!node.inbox.empty()) {
                 auto msg = node.inbox.front();
                 node.inbox.pop();
@@ -83,38 +120,38 @@ int main() {
                 if (msg.first == "TR") {
                     if (node.isPhold) {
                         token.q.push(msg.second);
-                        cout << "[Phold] Node " << node.id << " received TR from Node " << msg.second << endl;
+                        std::cout << "[Phold] Node " << node.id << " received TR from Node " << msg.second << std::endl;
                     }
                     else {
                         node.forwardMessage(msg, nodes);
-                        cout << "[Forwarded TR] Node " << node.id << " forwarded TR from Node " << msg.second << " to Node " << node.neighborId << endl;
+                        std::cout << "[Forwarded TR] Node " << node.id << " forwarded TR from Node " << msg.second << " to Node " << node.neighborId << std::endl;
                     }
                 }
                 else if (msg.first == "TKN") {
                     if (node.id == token.target) {
                         node.isPhold = true;
                         token.inTransit = false;
-                        cout << "[TOKEN RECEIVED] Node " << node.id << " is new Phold\n";
+                        std::cout << "[TOKEN RECEIVED] Node " << node.id << " is new Phold\n";
                         successCount++;
                         printQueue(token.q);
                     }
                     else {
                         node.forwardMessage(msg, nodes);
-                        cout << "[Forwarded TOKEN] Node " << node.id << " forwarded token to Node " << node.neighborId << endl;
+                        std::cout << "[Forwarded TOKEN] Node " << node.id << " forwarded token to Node " << node.neighborId << std::endl;
                     }
                 }
             }
             node.inbox = remaining;
         }
 
-        // if Phold not busy and queue has requests, send token
+        // If Phold has pending requests and token is free, send token to next target
         if (!token.inTransit && phold != -1 && nodes[phold].isPhold && !token.q.empty()) {
             int next = token.q.front();
             token.q.pop();
 
             if (next == phold) {
-                // self-handle without sending
-                cout << "[TOKEN SELF-HANDLED] Node " << phold << " kept the token\n";
+                // If token is for current Phold, process immediately
+                std::cout << "[TOKEN SELF-HANDLED] Node " << phold << " kept the token\n";
                 successCount++;
                 printQueue(token.q);
                 continue;
@@ -125,12 +162,12 @@ int main() {
             nodes[phold].isPhold = false;
             nodes[phold].forwardMessage({ "TKN", next }, nodes);
 
-            cout << "[TOKEN SENT] From Node " << phold << " to Node " << next << endl;
+            std::cout << "[TOKEN SENT] From Node " << phold << " to Node " << next << std::endl;
             printQueue(token.q);
-            phold = -1; // nowy phold jeszcze nieznany
+            phold = -1; // token is in transit, Phold unknown
         }
 
-        // update current phold
+        // Update who is the current Phold after token is received
         for (auto& node : nodes) {
             if (node.isPhold) {
                 phold = node.id;
@@ -139,6 +176,6 @@ int main() {
         }
     }
 
-    cout << "\nAll " << M << " requests have been successfully processed.\n";
+    std::cout << "\nAll " << M << " requests have been successfully processed.\n";
     return 0;
 }
