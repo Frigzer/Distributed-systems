@@ -3,6 +3,9 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <ctime>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -36,7 +39,19 @@ void printQueue(queue<int> q) {
     cout << "]\n";
 }
 
+void printRingState(const vector<Node>& nodes) {
+    cout << "[Ring State]\n";
+    for (const auto& node : nodes) {
+        cout << "Node " << node.id << ": Phold = " << (node.isPhold ? "true" : "false");
+        if (node.isPhold) cout << "  <-- has token";
+        cout << endl;
+    }
+    cout << endl;
+}
+
 int main() {
+    srand(time(0));
+
     int N = 5;  // Number of nodes
     int M = 10; // Number of requests
 
@@ -54,14 +69,25 @@ int main() {
     queue<pair<string, int>> events;
 
     // Generate M requests
-    for (int i = 0; i < M; ++i) {
-        int requester = rand() % N;
-        nodes[requester].sendTokenRequest(events);
-    }
+    //for (int i = 0; i < M; ++i) {
+    //    int requester = rand() % N;
+    //    nodes[requester].sendTokenRequest(events);
+    //}
 
-    int successCount = 0;
+    int successCount = 0, sentRequests = 0;
+    int csDelayCounter = 0;
+    bool inCS = false;
 
-    while (successCount < M) {
+    while (successCount < M || sentRequests < M) {
+        // Generate M requests
+        if (sentRequests < M && (rand() % 100) < 30) {
+            int requester = rand() % N;
+            nodes[requester].sendTokenRequest(events);
+            sentRequests++;
+            cout << "[New Request] Node " << requester << " sent TR\n";
+        }
+
+
         // Step 1: Handle all TR events and put them in Phold's queue
         queue<pair<string, int>> remainingEvents;
         while (!events.empty()) {
@@ -84,18 +110,25 @@ int main() {
 
         // Step 2: Phold finishes CS and passes the token
         if (!token.requestQueue.empty()) {
+            int currentPhold = token.currentHolder;
             int nextHolder = token.requestQueue.front();
             token.requestQueue.pop();
 
-            nodes[token.currentHolder].isPhold = false;
+            cout << "[CS] Node " << currentPhold << " processes request for Node " << nextHolder << "...\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+            nodes[currentPhold].isPhold = false;
             nodes[nextHolder].isPhold = true;
             token.currentHolder = nextHolder;
 
             successCount++;
             printQueue(token.requestQueue);
+            printRingState(nodes);
         }
 
-        events = remainingEvents;
+       events = remainingEvents;
+
+       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     cout << "All " << M << " requests have been successfully processed.\n";
