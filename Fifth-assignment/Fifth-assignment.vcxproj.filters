@@ -26,5 +26,14 @@
     <Text Include="input-2.txt">
       <Filter>Pliki zasobów</Filter>
     </Text>
+    <Text Include="input-3.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
+    <Text Include="input-4.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
+    <Text Include="input-5.txt">
+      <Filter>Pliki zasobów</Filter>
+    </Text>
   </ItemGroup>
 </Project>
