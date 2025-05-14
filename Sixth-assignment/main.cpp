@@ -98,22 +98,42 @@ struct WaitForGraph {
 WaitForGraph buildGlobalWFG(const std::vector<Node>& allNodes) {
 	WaitForGraph wfg;
 
+	std::cout << "\n== GRAPH CONSTRUCTION ==\n";
+
 	// Merge all local RSTs into a global resource map
 	std::unordered_map<std::string, std::string> globalRST;
-	for (const auto& node : allNodes) {
+	for (size_t siteIndex = 0; siteIndex < allNodes.size(); ++siteIndex) {
+		const auto& node = allNodes[siteIndex];
 		for (const auto& it : node.rst) {
 			globalRST[it.first] = it.second;
+			std::cout << "[RST] Resource " << it.first << " held by " << it.second << " (from SITE " << (siteIndex + 1) << ")\n";
 		}
 	}
 
 	// For each local PST entry, find who holds the needed resource
 	// and add an edge: process → holder
-	for (const auto& node : allNodes) {
+	for (size_t siteIndex = 0; siteIndex < allNodes.size(); ++siteIndex) {
+		const auto& node = allNodes[siteIndex];
 		for (const auto& it : node.pst) {
 			for (const auto& res : it.second) {
 				auto temp = globalRST.find(res);
-				if (temp != globalRST.end() && temp->second != it.first) {
-					wfg.addEdge(it.first, temp->second);
+
+				if (temp != globalRST.end()) {
+					const std::string& owner = temp->second;
+
+					if (owner != it.first) {
+						std::cout << "[EDGE] " << it.first << " waits for " << res
+							<< ", which is held by " << owner << "\n";
+						wfg.addEdge(it.first, owner);
+					}
+					else {
+						std::cout << "[INFO] " << it.first << " is waiting for " << res
+							<< ", which it already owns (ignored)\n";
+					}
+				}
+				else {
+					std::cout << "[INFO] " << it.first << " waits for unknown resource "
+						<< res << " (not found in any site)\n";
 				}
 			}
 		}
@@ -149,6 +169,19 @@ std::vector<Node> loadNodeFromFile(const std::string& filename) {
 
 		if (token == "SITE") {
 			if (currentSite != -1) {
+				// Debug print for the previous site
+				std::cout << "\n== SITE " << currentSite << " LOADED ==\n";
+				std::cout << "[RST] Resources held:\n";
+				for (const auto& it : node.rst) {
+					std::cout << "  " << it.first << " held by " << it.second << "\n";
+				}
+				std::cout << "[PST] Processes waiting:\n";
+				for (const auto& it : node.pst) {
+					std::cout << "  " << it.first << " waits for: ";
+					for (const auto& r : it.second) std::cout << r << " ";
+					std::cout << "\n";
+				}
+
 				nodes.push_back(node);	// store previous node
 				node = Node();			// start a new one
 			}
@@ -168,12 +201,24 @@ std::vector<Node> loadNodeFromFile(const std::string& filename) {
 
 	// Add the last parsed site
 	if (!node.pst.empty() || !node.rst.empty()) {
+		std::cout << "\n== SITE " << currentSite << " LOADED ==\n";
+		std::cout << "[RST] Resources held:\n";
+		for (const auto& it : node.rst) {
+			std::cout << "  " << it.first << " held by " << it.second << "\n";
+		}
+		std::cout << "[PST] Processes waiting:\n";
+		for (const auto& it : node.pst) {
+			std::cout << "  " << it.first << " waits for: ";
+			for (const auto& r : it.second) std::cout << r << " ";
+			std::cout << "\n";
+		}
+
 		nodes.push_back(node);
 	}
 
 	// Warn if declared number of sites doesn't match actual
 	if (nodes.size() != static_cast<size_t>(numSites)) {
-		std::cerr << "Warning: parsed" << nodes.size()
+		std::cerr << "Warning: parsed " << nodes.size()
 			<< " site(s), expected " << numSites << "\n";
 	}
 
@@ -189,13 +234,17 @@ int main() {
 	std::vector<Node> allSites = loadNodeFromFile(filename);
 
 	WaitForGraph wfg = buildGlobalWFG(allSites);
+
+	std::cout << "\n== WAIT-FOR GRAPH ==\n";
 	wfg.print();
 
+
+	std::cout << "\n== RESULT ==\n";
 	if (wfg.hasCycle()) {
-		std::cout << "\nDeadlock detected!\n";
+		std::cout << "Deadlock detected!\n";
 	}
 	else {
-		std::cout << "\nNo deadlock detected.\n";
+		std::cout << "No deadlock detected.\n";
 	}
 
 	return 0;
